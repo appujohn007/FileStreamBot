@@ -18,8 +18,13 @@ logging.basicConfig(
     level=logging.INFO,
     datefmt="%d/%m/%Y %H:%M:%S",
     format='[%(asctime)s] {%(pathname)s:%(lineno)d} %(levelname)s - %(message)s',
-    handlers=[logging.StreamHandler(stream=sys.stdout),
-              handlers.RotatingFileHandler("streambot.log", mode="a", maxBytes=104857600, backupCount=2, encoding="utf-8")],)
+    handlers=[
+        logging.StreamHandler(stream=sys.stdout),
+        handlers.RotatingFileHandler(
+            "streambot.log", mode="a", maxBytes=104857600, backupCount=2, encoding="utf-8"
+        ),
+    ],
+)
 
 logging.getLogger("aiohttp").setLevel(logging.ERROR)
 logging.getLogger("pyrogram").setLevel(logging.ERROR)
@@ -38,12 +43,11 @@ async def start_services():
     print()
     print("-------------------- Initializing Telegram Bot --------------------")
 
-
     await FileStream.start()
     bot_info = await FileStream.get_me()
     FileStream.id = bot_info.id
     FileStream.username = bot_info.username
-    FileStream.fname=bot_info.first_name
+    FileStream.fname = bot_info.first_name
     print("------------------------------ DONE ------------------------------")
     print()
     print("---------------------- Initializing Clients ----------------------")
@@ -56,11 +60,18 @@ async def start_services():
     print("------------------------------ DONE ------------------------------")
     print()
     print("------------------------- Service Started -------------------------")
-    print("                        bot =>> {}".format(bot_info.first_name))
+    print(f"                        bot =>> {bot_info.first_name}")
     if bot_info.dc_id:
-        print("                        DC ID =>> {}".format(str(bot_info.dc_id)))
-    print(" URL =>> {}".format(Server.URL))
+        print(f"                        DC ID =>> {bot_info.dc_id}")
+    print(f" URL =>> {Server.URL}")
     print("------------------------------------------------------------------")
+
+    # Send the "Bot started" message
+    try:
+        await FileStream.send_message(6883997969, "Bot started")
+    except Exception as e:
+        logging.error(f"Failed to send 'Bot started' message: {e}")
+
     await idle()
 
 async def cleanup():
